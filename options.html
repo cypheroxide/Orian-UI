@@ -75,11 +75,30 @@ body::before {
             </label>
             <p class=" text-sm mt-1">Turn on this feature to improve your experience with search results. With this feature enabled, you'll enjoy more intuitive and interactive search capabilities. Note: This feature is not available for live search at the moment.  </p>
         </div>
+        <div class="mb-4">
+            <label class="flex items-center">
+                <input type="checkbox" id="useOpenAI" class="form-checkbox h-5 w-5 text-blue-600">
+                <span class="toggle-description">Use OpenAI API</span>
+            </label>
+            <p class="text-sm mt-1">Enable this option to connect to OpenAI-compatible API endpoints.</p>
+        </div>
+        <div class="mb-4" id="apiKeySection" style="display: none;">
+            <label for="apiKey" class="block text-sm font-medium text-gray-700">OpenAI API Key</label>
+            <input type="text" id="apiKey" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+        </div>
         <p> Note: The responses generated are entirely dependent on the language model (LLM) that you are using.</p>
         <div class="mt-6">
             <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-400">Save Settings</button>
         </div>
     </div>
     <script src="scripts/PanelUI/options.js"></script>
+    <script>
+        const useOpenAI = document.getElementById('useOpenAI');
+        const apiKeySection = document.getElementById('apiKeySection');
+      
+        useOpenAI.addEventListener('change', () => {
+          apiKeySection.style.display = useOpenAI.checked ? 'block' : 'none';
+        });
+    </script>
 </body>
 </html>
