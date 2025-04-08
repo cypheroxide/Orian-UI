@@ -32,64 +32,67 @@ async function getModelFromStorage() {
   });
 }
 
+async function getConfiguration() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['useOpenAI', 'apiKey'], (result) => {
+      resolve(result);
+    });
+  });
+}
+
 const ollama_host = 'http://localhost:11434';
 // Function to get response from Language Learning Model (LLM)
 async function getResponseFromLLM(query, port) {
+  const { useOpenAI, apiKey } = await getConfiguration();
+  const data = useOpenAI
+    ? { prompt: query, apiKey, model: 'text-davinci-003', max_tokens: 100 }
+    : { model: await getModelFromStorage(), prompt: query };
 
-const selectedModel = await getModelFromStorage();
-  const data = { model: selectedModel, prompt: query }; // Data to send to the LLM
-  let d = ''; // Variable to store the accumulated response
-  port.postMessage({type: 'MODEL',model:selectedModel})
   try {
-    const response = await postRequest(data); // Send request to LLM
-    await getResponse(response, parsedResponse => {
-      const word = parsedResponse.response;
-      if (word !== undefined) {
-
-        d += word; // Accumulate the response
-        port.postMessage({ type: 'WORD', resp: word })
-
-   
+    const response = await postRequest(data, useOpenAI);
+    await getResponse(response, (parsedResponse) => {
+      const word = parsedResponse.response || parsedResponse.choices?.[0]?.text;
+      if (word) {
+        port.postMessage({ type: 'WORD', resp: word });
       }
     });
 
-    port.postMessage({ type: 'FINISHED', resp: d }); // Indicate that processing is finished
+    port.postMessage({ type: 'FINISHED', resp: 'Done' });
   } catch (error) {
-    if (error.name === 'AbortError') {
-     
-      port.postMessage({ type: 'ERROR', resp: "The request has been aborted." });
-    } else {
-
-      port.postMessage({ type: 'ERROR', resp: 'Failed to post request ' + ollama_host + ' '});
-
-    }
-    // Send error message to the content script
+    port.postMessage({ type: 'ERROR', resp: error.message });
   }
 }
 
 // Function to send a POST request to the LLM API
-async function postRequest(data) {
-   // Local server URL
-  const URL = `${ollama_host}/api/generate`; // API endpoint
+async function postRequest(data, useOpenAI = false) {
+  const URL = useOpenAI 
+    ? 'https://api.openai.com/v1/completions' 
+    : `${ollama_host}/api/generate`;
+
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+
+  if (useOpenAI) {
+    headers['Authorization'] = `Bearer ${data.apiKey}`; // Add API key for OpenAI
+  }
 
   try {
     const response = await fetch(URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(data),
-      signal: controller.signal // Use the AbortController to manage the request
+      signal: controller.signal,
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Error: ${errorData.message}`); // Throw an error if the response is not ok
+      throw new Error(`Error: ${errorData.message}`);
     }
 
-    return response; // Return the response if successful
+    return response;
   } catch (error) {
-    throw new Error(`Network error: ${error.message}`); // Handle network errors
+    throw new Error(`Network error: ${error.message}`);
   }
 }
 
