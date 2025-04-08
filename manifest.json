@@ -24,7 +24,8 @@
     "declarativeNetRequest",
     "system.cpu",
     "system.memory",
-    "commands"
+    "commands",
+    "https://api.openai.com/*"
   ],
   "background": {
     "service_worker": "scripts/Background/background.js",
