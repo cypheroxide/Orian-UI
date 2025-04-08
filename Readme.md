@@ -58,9 +58,14 @@ The Chat Interface is a key feature of Orian, enabling seamless interaction with
 - **System Information:** To optimize AI performance based on CPU and memory usage.
 
 ## 🔗 API Integration
-The extension communicates with a local Ollama instance via the following endpoints:
-- `http://localhost:11434/api/tags`
-- `http://localhost:11434/api/generate`
+The extension supports two API endpoints:
+1. **Local Ollama Instance:** Default endpoint for local LLM interaction.
+2. **OpenAI-Compatible API:** Enable this option in the settings and provide your OpenAI API key.
+
+### Configuration
+1. Open the extension settings.
+2. Toggle the "Use OpenAI API" option.
+3. Enter your OpenAI API key in the provided field.
 
 ## 📋 How to Use
 1. Open the side panel using `Ctrl+Shift+Left` (or `Command+Shift+Left` on macOS).
@@ -131,7 +136,7 @@ You can contribute in several ways:
 2. **Clone Your Fork**
    - Open your terminal and run the following command to clone the forked repository:
      ```bash
-     git clone https://github.com/<your-username>/orian.git
+     git clone https://github.com/KarthikeyaKollu/browserAI.01.git
      cd orian
      ```
 
